@@ -23,7 +23,7 @@ class BinanceClient(object):
     def _unsigned_request(self, method, path, params=None):
         """无签名访问"""
         url = path if path.startswith('https') else self._server_url + path
-        rsp = requests.request(method, url, params=params)
+        rsp = requests.request(method, url, params=params, headers=self._headers)
         return rsp.json()
 
     def _signed_request(self, method, path, params={}):
@@ -65,12 +65,80 @@ class BinanceClient(object):
         }
         return self._unsigned_request('GET', path, params)
 
-    def trades(self)
-         """近期成交列表"""
+    def trades(self, symbol, limit=500):
+        """近期成交列表"""
         path = '/api/v3/trades'
         params = {
             'symbol': symbol,
             'limit': limit      # 可选值:[5, 10, 20, 50, 100, 500, 1000, 5000]
+        }
+        return self._unsigned_request('GET', path, params)
+
+    def history(self, symbol, limit=500, fromId=None):
+        """查询历史成交"""
+        path = '/api/v3/historicalTrades'
+        params = {
+            'symbol': symbol,
+            'limit': limit,     # 默认 500; 最大值 1000.
+            'fromId': fromId    # 从哪一条成交id开始返回. 缺省返回最近的成交记录。
+        }
+        return self._unsigned_request('GET', path, params)
+
+    def agg_trades(self, symbol, fromId=None, start_time=None, end_time=None, limit=500):
+        """近期成交(归集)"""
+        path = '/api/v3/aggTrades'
+        params = {
+            'symbol': symbol,
+            'fromId': fromId,
+            'startTime': start_time,
+            'endTime': end_time,
+            'limit': limit
+        }
+        return self._unsigned_request('GET', path, params)
+
+    def klines(self, symbol, interval, start_time=None, end_time=None, limit=500):
+        """K线数据
+        interval: 1/3/5/15/30m,1/2/4/6/8/12h,1/3d,1w,1M
+        """
+        path = '/api/v3/klines'
+        params = {
+            'symbol': symbol,
+            'interval': interval,
+            'startTime': start_time,
+            'endTime': end_time,
+            'limit': limit
+        }
+        return self._unsigned_request('GET', path, params)
+
+    def avg_price(self, symbol):
+        """当前平均价格"""
+        path = '/api/v3/avgPrice'
+        params = {
+            'symbol': symbol
+        }
+        return self._unsigned_request('GET', path, params)
+
+    def ticker_24hr(self, symbol=None):
+        """24hr 价格变动情况"""
+        path = '/api/v3/ticker/24hr'
+        params = {
+            'symbol': symbol
+        }
+        return self._unsigned_request('GET', path, params)
+
+    def ticker_price(self, symbol=None):
+        """最新价格"""
+        path = '/api/v3/ticker/price'
+        params = {
+            'symbol': symbol
+        }
+        return self._unsigned_request('GET', path, params)
+
+    def ticker_book(self, symbol=None):
+        """当前最优价格"""
+        path = '/api/v3/ticker/bookTicker'
+        params = {
+            'symbol': symbol
         }
         return self._unsigned_request('GET', path, params)
 
